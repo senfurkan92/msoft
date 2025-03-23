@@ -1,0 +1,70 @@
+﻿@model (int TotalUser, int AdminCount, int ManagerCount, int CostumerCount)
+
+<div class="d-flex gap-3 justify-content-around flex-wrap">
+    <div>
+        <div class="card" style="width: 18rem;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between pe-4">
+                    <h3 class="card-title">Toplam</h3>
+                    <h3>@Model.TotalUser</h3>
+                </div>
+                <p class="card-text">
+                    <small class="text-muted">
+                        Toplam kullanıcı sayısı.
+                    </small>
+                </p>
+            </div>
+        </div>
+    </div>
+    @if (User.IsInRole("Admin"))
+    {
+        <div>
+            <div class="card" style="width: 18rem;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between pe-4">
+                        <h3 class="card-title">Admin</h3>
+                        <h3>@Model.AdminCount</h3>
+                    </div>
+                    <p class="card-text">
+                        <small class="text-muted">
+                            Admin yetkisine sahip kullanıcı sayısı.
+                        </small>
+                    </p>
+                </div>
+            </div>
+        </div>
+    }
+    @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+    {
+        <div>
+            <div class="card" style="width: 18rem;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between pe-4">
+                        <h3 class="card-title">Yönetici</h3>
+                        <h3>@Model.ManagerCount</h3>
+                    </div>
+                    <p class="card-text">
+                        <small class="text-muted">
+                            Yönetici yetkisine sahip kullanıcı sayısı.
+                        </small>
+                    </p>
+                </div>
+            </div>
+        </div>
+    }
+    <div>
+        <div class="card" style="width: 18rem;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between pe-4">
+                    <h3 class="card-title">Müşteri</h3>
+                    <h3>@Model.CostumerCount</h3>
+                </div>
+                <p class="card-text">
+                    <small class="text-muted">
+                        Müşteri yetkisine sahip kullanıcı sayısı.
+                    </small>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

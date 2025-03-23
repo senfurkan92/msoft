@@ -1,0 +1,158 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" lang="tr" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MeSoftCase</title>
+    <link rel="stylesheet" href="~/css/account.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.css" integrity="sha512-3pIirOrwegjM6erE5gPSwkUzO+3cTjpnV9lexlNZqvupR64iZBnOOTiiLPb9M36zpMScbmUNIcHUqKD47M719g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        [v-cloak] {
+            display:none;
+        }
+    </style>
+</head>
+<body>
+    <div id="app" v-cloak>
+        <div class="container" id="container">
+            <div class="form-container sign-up-container">
+                <form v-on:submit.prevent="signUpAction">
+                    <h1 style="color: #064e88; margin-bottom: 1rem">Hesap Oluştur</h1>
+                    <input v-model="signUp.email" type="email" placeholder="E-posta" required />
+                    <small v-if="signUp.validationErrors.email" class="error-message">{{signUp.validationErrors.email[0]}}</small>
+                    <input v-model="signUp.password" v-bind:type="!signUp.showPassword ? 'password' : 'text'" placeholder="Şifre" required />
+                    <small v-if="signUp.validationErrors.password" class="error-message">{{signUp.validationErrors.password[0]}}</small>
+                    <button style="margin-top: 1rem" v-bind:disabled="freeze">GÖNDER</button>
+                </form>
+            </div>
+            <div class="form-container sign-in-container">
+                <form v-on:submit.prevent="signInAction">
+                    <h1 style="color: #064e88; margin-bottom: 1rem">Giriş Yap</h1>
+                    <input v-model="signIn.email" type="email" placeholder="E-posta" required />
+                    <small v-if="signIn.validationErrors.email" class="error-message">{{signIn.validationErrors.email[0]}}</small>
+                    <input v-model="signIn.password" v-bind:type="!signIn.showPassword ? 'password' : 'text'" placeholder="Şifre" required />
+                    <small v-if="signIn.validationErrors.password" class="error-message">{{signIn.validationErrors.password[0]}}</small>
+                    <button style="margin-top: 1rem" v-bind:disabled="freeze">GÖNDER</button>
+                </form>
+            </div>
+            <div class="overlay-container">
+                <div class="overlay">
+                    <div class="overlay-panel overlay-left">
+                        <h1>Tekrar Hoş Geldiniz!</h1>
+                        <p>Bizimle bağlantıda kalmak için lütfen giriş yapın.</p>
+                        <button v-bind:disabled="freeze" class="ghost" id="signIn">Giriş Yap</button>
+                    </div>
+                    <div class="overlay-panel overlay-right">
+                        <h1>Merhaba!</h1>
+                        <p>Bilgilerini gir ve bizimle yolculuğuna başlayın.</p>
+                        <button v-bind:disabled="freeze" class="ghost" id="signUp">Kayıt Ol</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js" integrity="sha512-VEd+nq25CkR676O+pLBnDW09R7VQX9Mdiij052gVCp5yVH3jGtH70Ho/UUv4mJDsEdTvqRCFZg0NKGiojGnUCw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.8.4/axios.min.js" integrity="sha512-2A1+/TAny5loNGk3RBbk11FwoKXYOMfAK6R7r4CpQH7Luz4pezqEGcfphoNzB7SM4dixUoJsKkBsB6kg+dNE2g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <script>
+        const { createApp } = Vue;
+
+        const urlParams = new URLSearchParams(window.location.search)
+        let referralCode = urlParams.get('referralCode');     
+
+        createApp({
+            data() {
+                return {
+                    freeze: false,
+                    signUp: {
+                        email: null,
+                        password: null,
+                        showPassword: false,
+                        referralCode: referralCode,
+                        validationErrors: {}
+                    },
+                    signIn: {
+                        email: null,
+                        password: null,
+                        showPassword: false,
+                        validationErrors: {}
+                    }
+                };
+            },
+            methods: {
+                signUpAction() {
+                    let payload = {
+                        email: this.signUp.email,
+                        password: this.signUp.password,
+                        referralCode: this.signUp.referralCode
+                    }
+
+                    this.freeze = true
+
+                    axios.post('/api/account/signup', payload)
+                        .then(resp => {
+                            toastr.success('Kayıt başarılı')
+                            setTimeout(() => {
+                                window.location.href = "/"
+                            }, 500)
+                        }).catch(err => {
+                            toastr.error(err.response.data.message)
+                            this.signUp.validationErrors = err.response.data.validationErrors ?? {}
+                            this.freeze = false
+                        }).finally(_ => {
+                            this.freeze = false
+                        })
+                },
+                signInAction() {
+                    let payload = {
+                        email: this.signIn.email,
+                        password: this.signIn.password
+                    }
+
+                    this.freeze = true
+
+                    axios.post('/api/account/signin', payload)
+                        .then(resp => {
+                            toastr.success('Giriş yapıldı')
+                            setTimeout(() => {
+                                window.location.href = "/"
+                            }, 500)
+                        }).catch(err => {
+                            toastr.error(err.response.data.message)
+                            this.signIn.validationErrors = err.response.data.validationErrors ?? {}
+                            this.freeze = false
+                        }).finally(_ => {
+                            this.freeze = false
+                        })
+                }
+            },
+            mounted() {
+                const signUpButton = document.getElementById('signUp');
+                const signInButton = document.getElementById('signIn');
+                const container = document.getElementById('container');
+
+                signUpButton.addEventListener('click', () => {
+                    container.classList.add("right-panel-active");
+                });
+
+                signInButton.addEventListener('click', () => {
+                    container.classList.remove("right-panel-active");
+                });
+
+                if (this.signUp.referralCode) {
+                    setTimeout(() => {
+                        document.querySelector("#signUp").click()
+                    }, 500)
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

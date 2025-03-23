@@ -1,0 +1,35 @@
+{
+  "IpRateLimiting": {
+    "EnableEndpointRateLimiting": true,
+    "StackBlockedRequests": false,
+    "RealIpHeader": "X-Real-IP",
+    "ClientIdHeader": "X-ClientId",
+    "HttpStatusCode": 429,
+    "GeneralRules": [
+      {
+        "Endpoint": "*",
+        "Period": "1m",
+        "Limit": 10
+      },
+      {
+        "Endpoint": "POST:/api/account/generateReferralUrl",
+        "Period": "10s",
+        "Limit": 2
+      },
+      {
+        "Endpoint": "POST:/api/account/signIn",
+        "Period": "10s",
+        "Limit": 2
+      },
+      {
+        "Endpoint": "POST:/api/account/signUp",
+        "Period": "10s",
+        "Limit": 2
+      }
+    ],
+    "QuotaExceededResponse": {
+      "ContentType": "application/json",
+      "Content": "{{\"message\":\"Kısa sürede çok fazla istekte bulundunuz.\"}}"
+    }
+  }
+}

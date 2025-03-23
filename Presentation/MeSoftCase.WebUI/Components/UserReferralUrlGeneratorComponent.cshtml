@@ -1,0 +1,62 @@
+﻿<div>
+    <form onsubmit="generateReferralUrl(event)">
+        <div class="input-group mb-3">
+            <input id="referralEmail" type="email" required class="form-control" placeholder="Kullanıcı E-posta Adresi" aria-describedby="button-addon2">
+            <button class="btn btn-primary" type="submit" id="button-addon2">Davet bağlantısı üret</button>
+        </div>
+    </form>
+    <div id="referralUrlContainer" hidden>
+        Davet Bağlantısı: <a id="referralUrl"></a>
+        <button class="btn btn-sm ms-2 btn-outline-secondary" onclick="copyReferralUrl()"><i class="fas fa-copy"></i></button>
+    </div>
+</div>
+
+<script>
+    function generateReferralUrl(e) {
+        e.preventDefault()
+
+        document.querySelector("#referralUrlContainer").setAttribute("hidden", "hidden")
+        document.querySelector("#referralUrl").innerHTML = ""
+        document.querySelector("#referralUrl").removeAttribute("href")
+        document.querySelector("#button-addon2").setAttribute("disabled", "disabled")
+        document.querySelector("#button-addon2").innerHTML = "Üretiliyor..."
+
+        fetch('/api/account/generateReferralUrl', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                email: document.querySelector('#referralEmail').value
+            })
+        })
+            .then(response => {
+                return response.json();
+            })
+            .then(data => {
+                if (data.isSuccess) {
+                    toastr.success("Davet bağlantısı üretildi.")
+                    document.querySelector("#referralUrlContainer").removeAttribute("hidden")
+                    document.querySelector("#referralUrl").innerHTML = data.data.referralUrl
+                    document.querySelector("#referralUrl").setAttribute("href", data.data.referralUrl)
+                } else {
+                    toastr.error(data.message)
+                }
+            })
+            .catch(error => {
+                console.error("Hata:", error);
+            })
+            .finally(_ => {
+                document.querySelector("#button-addon2").removeAttribute("disabled")
+                document.querySelector("#button-addon2").innerHTML = "Davet bağlantısı üret"
+            });
+    }
+</script>
+
+<script>
+    function copyReferralUrl() {
+        var href = document.getElementById("referralUrl").href;
+
+        navigator.clipboard.writeText(href).then(_ => { })
+    }
+</script>

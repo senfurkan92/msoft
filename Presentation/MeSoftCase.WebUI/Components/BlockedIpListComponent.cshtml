@@ -1,0 +1,66 @@
+﻿@using MeSoftCase.Application.Features.Mediator.Results.BlockedIpResults
+
+@model List<BlockedIpListItemResult>
+
+<table id="myTableIp" class="table dataTable">
+    <thead>
+        <tr>
+            <th scope="col">Ip Adresi</th>
+            <th scope="col">Yasak Zamanı</th>
+            @if (User.IsInRole("Admin"))
+            {
+                <th scope="col">#</th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model is { Count: > 0 })
+        {
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.IpAddress</td>
+                    <td>@item.CreatedAt.ToLocalTime().ToString()</td>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <td>
+                            <button class="btn btn-sm btn-outline-danger py-0 mb-1" onclick="deleteBlockedId('@item.IpAddress')">Sil</button>
+                        </td>
+                    }
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="5">
+                    Kayıt Bulunamadı.
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<script>
+    function deleteBlockedId(id) {
+        fetch('/api/blockedIps/delete/' + id, {
+            method: 'GET'
+        })
+            .then(response => {
+                return response.json();
+            })
+            .then(data => {
+                if (data.isSuccess) {
+                    toastr.success("Yasak Kaldırıldı.")
+                    setTimeout(() => {
+                        window.location.href = "/?tab=ip"
+                    }, 500)
+                } else {
+                    toastr.error(data.message)
+                }
+            })
+            .catch(error => {
+                console.error("Hata:", error);
+            });
+    }
+</script>

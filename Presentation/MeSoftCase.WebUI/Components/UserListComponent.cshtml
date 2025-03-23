@@ -1,0 +1,86 @@
+﻿@using MeSoftCase.Application.Features.Mediator.Results.AppUserResults
+
+@model List<AppUserListItemResult>
+
+<table id="myTableUser" class="table dataTable">
+    <thead>
+        <tr>
+            <th scope="col">Kullanıcı Adı</th>
+            <th scope="col">E-posta</th>
+            <th scope="col">Hesap Kilit Bitis Zamanı</th>
+            <th scope="col">Rol</th>
+            @if (User.IsInRole("Admin"))
+            {
+                <th scope="col">#</th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model is { Count: > 0 })
+        {
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.UserName</td>
+                    <td>@item.Email</td>
+                    @if (item.LockoutEnd.HasValue && item.LockoutEnd > DateTimeOffset.UtcNow)
+                    {
+                        <td>@(item.LockoutEnd.Value.ToLocalTime().ToString())</td>
+                    }
+                    else
+                    {
+                        <td>-</td>
+                    }
+                    <td>@(item.Roles ?? "-")</td>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        @if (item.Roles != null && item.Roles.Contains("Admin"))
+                        {
+                            <td>
+                                <button class="btn btn-sm btn-outline-danger py-0 mb-1" disabled>Sil</button>
+                            </td>
+                        }
+                        else
+                        {
+                            <td>
+                                <button class="btn btn-sm btn-outline-danger py-0 mb-1" onclick="deleteUser('@item.Id')">Sil</button>
+                            </td>
+                        }
+                    }
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="5">
+                    Kayıt Bulunamadı.
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<script>
+    function deleteUser(id) {
+        fetch('/api/account/delete/' + id, {
+            method: 'GET'
+        })
+            .then(response => {
+                return response.json();
+            })
+            .then(data => {
+                if (data.isSuccess) {
+                    toastr.success("Hesap silindi.")
+                    setTimeout(() => {
+                        window.location.reload()
+                    }, 500)
+                } else {
+                    toastr.error(data.message)
+                }
+            })
+            .catch(error => {
+                console.error("Hata:", error);
+            });
+    }
+</script>
