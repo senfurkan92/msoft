@@ -12,7 +12,7 @@
     @RenderSection("Head", required: false)
 </head>
 <body>
-    <div style="display: grid; height: 100vh; grid-template-rows: max-content auto max-content">
+    <div style="display: grid; min-height: 100vh; grid-template-rows: max-content auto max-content">
         <header class="border-bottom shadow-sm">
             <nav class="navbar navbar-expand-lg bg-body-tertiary">
                 <div class="container">
@@ -48,7 +48,7 @@
             </main>
         </div>
 
-        <footer class="border-top footer text-muted py-4">
+        <footer class="border-top footer text-muted py-2 mt-2">
             <div class="container text-center">
                 &copy; @DateTime.Now.ToString("yyyy") - MeSoftCase
             </div>
